@@ -1,10 +1,9 @@
+import re
+import os
+import json
 import random 
 import string 
-import os
-from bs4 import BeautifulSoup
 import requests
-import re
-import json
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 
