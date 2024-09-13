@@ -7,6 +7,8 @@ from dotenv import load_dotenv
 from helping_fcn import sec_key, saveid, check_root, claiming_key, checking_paid, gpt_net_checker, fb_net_checker, info, broad,savecookie,  fb_checker, netflix_checker, netflix_net_checker, crunchy_checker, gpt_checker
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update, bot
 from telegram.ext import Updater, CommandHandler, CallbackQueryHandler, MessageHandler, Filters, CallbackContext
+from keep_alive import keep_alive
+keep_alive()
 load_dotenv()
 owner = "https://t.me/celestial_being"
 token = os.getenv('bot_api')
