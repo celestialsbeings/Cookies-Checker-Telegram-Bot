@@ -1,0 +1,11 @@
+Step no. 1 install python 3.8
+then extract files in the some folder 
+open folder and open cmd in tha folder
+type pip install -r requirements.txt
+python bot.py 
+Now your bot is running 
+
+
+How to add bot token 
+open .env file and there is bot_api var change it's value to desired open
+That's it your are done
