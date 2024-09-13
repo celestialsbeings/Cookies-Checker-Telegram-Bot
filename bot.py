@@ -4,11 +4,10 @@ import re
 import os
 from pathlib import Path
 from dotenv import load_dotenv
-from helping_fcn import sec_key, saveid, check_root, claiming_key, checking_paid, gpt_net_checker, fb_net_checker, info, broad,savecookie,  fb_checker, netflix_checker, netflix_net_checker, crunchy_checker, gpt_checker
+from helping_fcn import sec_key, saveid, check_root, claiming_key, checking_paid, gpt_net_checker, fb_net_checker, count_user, info, broad,savecookie,  fb_checker, netflix_checker, netflix_net_checker, crunchy_checker, gpt_checker
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update, bot
 from telegram.ext import Updater, CommandHandler, CallbackQueryHandler, MessageHandler, Filters, CallbackContext
-from keep_alive import keep_alive
-keep_alive()
+
 load_dotenv()
 owner = "https://t.me/celestial_being"
 token = os.getenv('bot_api')
@@ -17,7 +16,7 @@ updater = Updater(token, use_context=True)
 def start(update: Update, context: CallbackContext):
     user_id = update.message.from_user.id
     saveid(user_id)
-    
+    users = count_user()
     message = (
         "🔑 <b>Welcome to the Cookie Checker Bot!</b> 🔑\n\n"
         "Our mission is simple: we help you verify the validity of your cookies 📝 and ensure they are still working for various platforms like Netflix! 🍿\n\n"
@@ -25,7 +24,8 @@ def start(update: Update, context: CallbackContext):
         "• Quickly check if your cookies are still valid for login access 🔍\n"
         "• Validate your Netflix cookies before using them to avoid interruptions 🎥\n"
         "• Manage your subscription info and keep track of your keys 📜\n\n"
-        "Need to know all the commands? Type <b>/help</b> to see the full list and get started 🚀"
+        "Need to know all the commands? Type <b>/help</b> to see the full list and get started 🚀\n\n"
+        f"<b>Current User - <code>{users}</code> </b>"
     )
 
     update.message.reply_text(message, parse_mode='HTML', reply_to_message_id=update.message.message_id)
