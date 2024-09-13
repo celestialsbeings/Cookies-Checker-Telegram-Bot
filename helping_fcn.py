@@ -16,14 +16,18 @@ def savecookie(cookies_data,file_name):
         f.write(cookies_data)
     return valid_file_path
 
-
+def count_user():
+    with open("userid.txt", "r") as f:
+        lines = f.readlines()
+    line_count = len(lines)
+    return int(line_count)
+    
 
 def sec_key(length=16):
     # Use only alphanumeric characters and a few selected symbols
     safe_characters = string.ascii_letters + string.digits + "-_"
     key = ''.join(random.choice(safe_characters) for _ in range(length))
     return "CRYPTO" + key
-
 
 
 def saveid(user_id):
