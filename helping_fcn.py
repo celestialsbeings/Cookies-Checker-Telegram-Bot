@@ -1,6 +1,5 @@
-import re
 import os
-import json
+import re
 import random 
 import string 
 import requests
@@ -21,13 +20,13 @@ def count_user():
         lines = f.readlines()
     line_count = len(lines)
     return int(line_count)
-    
 
 def sec_key(length=16):
     # Use only alphanumeric characters and a few selected symbols
     safe_characters = string.ascii_letters + string.digits + "-_"
     key = ''.join(random.choice(safe_characters) for _ in range(length))
     return "CRYPTO" + key
+
 
 
 def saveid(user_id):
@@ -362,13 +361,6 @@ def fb_net_checker(cookies_data):
             # Make the request
             req = session.get("https://www.facebook.com/", cookies=jar, headers=headers)
 
-            # Save response for debugging, ensuring utf-8 encoding
-            # soup = BeautifulSoup(req.text, "html.parser")
-            # data = soup.prettify()
-            # with open("response.html", "w", encoding="utf-8") as f:
-            #     f.write(data)
-
-            # Check for "NAME" and "SHORT_NAME"
             match = user_info_pattern.search(req.text)
             if match:  # If both fields are found
                 name, short_name = match.groups()
@@ -418,6 +410,83 @@ def fb_checker(cookies_list):
                 return False
     except Exception as e:
         print(f"Error in fb_checker: {str(e)}")
+        return False
+
+def insta_checker(cookies_list):
+    # Compile regex to find "NAME" field
+    user_info_pattern =  re.compile(r'"username":"(.*?)"')
+    
+    try:
+        with requests.Session() as session:
+            jar = requests.cookies.RequestsCookieJar()
+
+            # Set cookies efficiently
+            for cookie in cookies_list:
+                jar.set_cookie(requests.cookies.create_cookie(
+                    domain=cookie['domain'],
+                    name=cookie['name'],
+                    value=cookie['value'],
+                    path=cookie.get('path', '/'),
+                    secure=cookie.get('secure', False)
+                ))
+
+            headers = {
+                # "referer": "https://www.facebook.com/",
+                "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
+                "sec-ch-ua-platform": "Windows",
+                "accept-language": "en-US,en;q=0.5",
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36'
+            }
+
+            # Make the request
+            req = session.get("https://www.instagram.com/", cookies=jar, headers=headers)
+            match = user_info_pattern.search(req.text)
+            if match:  # If both fields are found
+                username = match.groups()
+                if username:
+                    return True
+            else:
+                return False
+    except Exception as e:
+        print(f"Error in insta_checker: {str(e)}")
+        return False
+
+def insta_net_checker(cookies_data):
+    user_info_pattern =  re.compile(r'"username":"(.*?)"')
+    try:
+        cookies_list = parse_netscape_cookies(cookies_data)
+        with requests.Session() as session:
+            jar = requests.cookies.RequestsCookieJar()
+
+            # Set cookies efficiently
+            for cookie in cookies_list:
+                jar.set_cookie(requests.cookies.create_cookie(
+                    domain=cookie['domain'],
+                    name=cookie['name'],
+                    value=cookie['value'],
+                    path=cookie.get('path', '/'),
+                    secure=cookie.get('secure', False)
+                ))
+
+            headers = {
+                # "referer": "https://www.facebook.com/",
+                "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
+                "sec-ch-ua-platform": "Windows",
+                "accept-language": "en-US,en;q=0.5",
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36'
+            }
+
+            # Make the request
+            req = session.get("https://www.instagram.com/", cookies=jar, headers=headers)
+            match = user_info_pattern.search(req.text)
+            if match:  # If both fields are found
+                username = match.groups()
+                if username:
+                    return True
+            else:
+                return False
+    except Exception as e:
+        print(f"Error in insta_net_checker: {str(e)}")
         return False
 
 def crunchy_checker(cookies_list):
@@ -499,8 +568,3 @@ def netflix_net_checker(cookies_data):
     except Exception as e:
         print(f"Error in netflix_net_checker: {str(e)}")
 
-
-# with open("a.txt","r") as f:
-#     cookies_data = f.read()
-    
-# gpt_net_checker(cookies_data)
