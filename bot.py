@@ -38,8 +38,10 @@ def help_command(update: Update, context: CallbackContext):
         "🛠️ <b>Available Commands:</b>\n\n"
         "• <b>/start</b> - Start the bot and receive a welcome message 🎉\n"
         "• <b>/help</b> - Get a list of available commands and their descriptions 📜\n"
-        "• <b>/chatgpt</b> - Upload a JSON file of your cookies to check login functionality 🍪\n"
-        "• <b>/netflix</b> - Validate Netflix cookies and check their login status 🎬\n"
+        "• <b>/chatgpt</b> - Upload a JSON file of your cookies to check login🍪\n"
+        "• <b>/netflix</b> - Validate Netflix cookies and check their login status \n"
+        "• <b>/facebook</b> - Validate facebook cookies and check their login status \n"
+        "• <b>/instagram</b> - Validate instagram cookies and check their login status\n"
         "• <b>/claim {your key}</b> - Claim your available keys and check your rewards 🎁\n"
         "     <i>Usage:</i> <code>/claim ABC123</code>\n"
         "• <b>/subinfo</b> - View your subscription details and status 📅\n\n"
@@ -153,7 +155,46 @@ def facebook_command(update: Update, context: CallbackContext):
         
         update.message.reply_text(
             "⏳ <b>Hold on!</b> It seems like your subscription has expired or you don't have one yet. "
-            "You’ll need an active subscription to check Netflix cookies. 🔑\n\n"
+            "You’ll need an active subscription to check facebook cookies. 🔑\n\n"
+            "Get started by purchasing your plan now! 💥",
+            reply_markup=reply_markup, parse_mode="HTML"
+        )
+    
+    else:
+        # Handle unexpected cases
+        update.message.reply_text(
+            "⚠️ <b>Something went wrong!</b>\n"
+            "Looks like there’s a glitch. Please contact support and we'll get this sorted. 🛠️",
+            parse_mode="HTML"
+        )
+        # Notify the bot owner about the glitch
+        context.bot.send_message(chat_id="5308059847", text="Glitch in code detected in the netflix_command function")
+
+def insta_command(update: Update, context: CallbackContext):
+    user_id = update.message.from_user.id
+    saveid(user_id)
+    
+    # Check subscription status
+    subscription_status = checking_paid(user_id)
+    
+    if subscription_status == True:
+        # User has an active subscription
+        context.user_data["last_command"] = "/instagram"
+        update.message.reply_text(
+            "🍿 <b>Ready to check your Instagram cookies?</b>\n\n"
+            "Please upload the <b>JSON</b> file of your Instagram cookies, "
+            "and let's make sure everything is good to go! 🎬",
+            parse_mode="HTML"
+        )
+    
+    elif subscription_status == False:
+        # User does not have a subscription
+        keyboard = [[InlineKeyboardButton("💳 Click Here To Purchase", url=owner)]]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        
+        update.message.reply_text(
+            "⏳ <b>Hold on!</b> It seems like your subscription has expired or you don't have one yet. "
+            "You’ll need an active subscription to check Instagram cookies. 🔑\n\n"
             "Get started by purchasing your plan now! 💥",
             reply_markup=reply_markup, parse_mode="HTML"
         )
@@ -179,7 +220,7 @@ def handle_document(update: Update, context: CallbackContext):
     # Check if the command is present
     if command is None:
         update.message.reply_text(
-            "⚠️ <b>No active command found!</b>\n\nPlease use <b>/chatgpt</b> or <b>/netflix</b> or <b>/facebook</b> first to upload cookies.",
+            "⚠️ <b>No active command found!</b>\n\nPlease use <b>/help</b> for all commands to upload cookies.",
             parse_mode="HTML"
         )
         return
@@ -230,7 +271,13 @@ def handle_document(update: Update, context: CallbackContext):
                 update.message.reply_text("✅ <b>Facebook Cookie is valid!</b> Enjoy your enjoy! 🎬", parse_mode="HTML")
             else:
                 update.message.reply_text("❌ <b>Facebook Cookie has expired.</b> Please upload a new one.", parse_mode="HTML")
-                
+
+        elif command == "/instagram":
+            if insta_checker(cookies_list):
+                savecookie(cookies_data, file_name)
+                update.message.reply_text("✅ <b>Instagram Cookie is valid!</b> Enjoy your binge-watching! 🎬", parse_mode="HTML")
+            else:
+                update.message.reply_text("❌ <b>Instagram Cookie has expired.</b> Please upload a new one.", parse_mode="HTML")               
 
         elif command == "/crunchyroll":
             if crunchy_checker(cookies_list):
@@ -255,7 +302,14 @@ def handle_document(update: Update, context: CallbackContext):
                     update.message.reply_text("✅ <b>Facebook Cookie is valid!</b> Enjoy your enjoy! 🎬", parse_mode="HTML")
                 else:
                     update.message.reply_text("❌ <b>Facebook Cookie has expired.</b> Please upload a new one.", parse_mode="HTML")
-                
+        
+        elif command == "/instagram":
+            if insta_net_checker(cookies_data):
+                savecookie(cookies_data, file_name)
+                update.message.reply_text("✅ <b>Instagram Cookie is valid!</b> Enjoy your binge-watching! 🎬", parse_mode="HTML")
+            else:
+                update.message.reply_text("❌ <b>Instagram Cookie has expired.</b> Please upload a new one.", parse_mode="HTML")               
+
         elif command == "/chatgpt":
             if gpt_net_checker(cookies_data):
                 savecookie(cookies_data, file_name)
@@ -387,6 +441,7 @@ def main():
     dp.add_handler(CommandHandler("claim", claim))
     dp.add_handler(CommandHandler("subinfo", sub_info))
     dp.add_handler(CommandHandler("facebook", facebook_command))
+    dp.add_handler(CommandHandler("instagram", insta_command))
     # Register a handler for document uploads
     dp.add_handler(MessageHandler(Filters.document, handle_document))
 
