@@ -176,44 +176,6 @@ def broad():
             idss.append(id)
     return idss
         
-        
-def netflix_checker(cookies_list):
-    try:
-        with requests.Session() as session:
-            jar = requests.cookies.RequestsCookieJar()
-
-            # Set cookies from JSON data
-            for cookie in cookies_list:
-                jar.set_cookie(requests.cookies.create_cookie(
-                    domain=cookie['domain'],
-                    name=cookie['name'],
-                    value=cookie['value'],
-                    path=cookie.get('path', '/'),
-                    secure=cookie.get('secure', False)
-                ))
-
-            # Set headers
-            headers = {
-                "referer": "https://www.netflix.com/",
-                "accept": "*/*",
-                "sec-ch-ua-platform": "Windows",
-                "accept-language": "en-US,en;q=0.5",
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36'
-            }
-
-            # Send request to Netflix
-            req = session.get("https://www.netflix.com", cookies=jar, headers=headers)
-            print(req.url)
-
-            # Check if the response redirects to /browse (indicating login success)
-            if "/browse" in req.url:
-                return True
-            else:
-                return False
-
-    except Exception as e:
-        print(f"Error in netflix_net_checker: {str(e)}")
-        return False
     
 def gpt_checker(cookies_list):
     user_info_pattern = re.compile(r'"id":"(.*?)","name":"(.*?)","email":"(.*?)"')
@@ -490,7 +452,7 @@ def insta_net_checker(cookies_data):
         return False
 
 def crunchy_checker(cookies_list):
-    user_info_pattern = re.compile(r'"NAME":"(.*?)"')
+    # user_info_pattern = re.compile(r'"NAME":"(.*?)"')
     try:
         with requests.Session() as session:
             jar = requests.cookies.RequestsCookieJar()
@@ -506,29 +468,83 @@ def crunchy_checker(cookies_list):
                 ))
 
             headers = {
-                "referer": "https://www.facebook.com/",
                 "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
+                "accept-encoding": "gzip, deflate, br, zstd",
+                "accept-language": "en-US,en;q=0.7",
+                "cache-control": "max-age=0",
+                "priority": "u=0, i",
+                "referer": "https://sso.crunchyroll.com/",
+                "sec-ch-ua": '"Chromium";v="128", "Not;A=Brand";v="24", "Brave";v="128"',
+                "sec-ch-ua-mobile": "?0",
+                "sec-ch-ua-platform": '"Windows"',
+                "sec-fetch-dest": "document",
+                "sec-fetch-mode": "navigate",
+                "sec-fetch-site": "same-site",
+                "sec-fetch-user": "?1",
+                "sec-gpc": "1",
+                "upgrade-insecure-requests": "1",
+                "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36"
+            }
+
+            # Make the request
+            req = requests.Session()
+            req = session.get("https://www.crunchyroll.com/signup", cookies=jar, headers=headers)
+            soup = BeautifulSoup(req.text,"html.parser")
+            data = soup.prettify()
+            with open("response.html", "w") as f:
+                f.write(data)
+            # # Use the pre-compiled regex for matching
+            # match = user_info_pattern.search(req.text)
+            # if match:
+            #     user_id, user_name, user_email = match.groups()
+            #     if user_id and user_name and user_email:
+            #         return True
+            #     else:
+            #         return False
+            # else:
+            #     return False
+    except Exception as e:
+        print(f"Error in fb_checker: {str(e)}")
+        return False
+    
+    
+def netflix_checker(cookies_list):
+    try:
+        with requests.Session() as session:
+            jar = requests.cookies.RequestsCookieJar()
+
+            # Add cookies to the session
+            for cookie in cookies_list:
+                jar.set_cookie(requests.cookies.create_cookie(
+                    domain=cookie['domain'],
+                    name=cookie['name'],
+                    value=cookie['value'],
+                    path=cookie.get('path', '/'),
+                    secure=cookie.get('secure', False),
+                    expires=cookie.get('expiry')
+                ))
+
+            # Set headers
+            headers = {
+                "referer": "https://www.netflix.com/",
+                "accept": "*/*",
                 "sec-ch-ua-platform": "Windows",
                 "accept-language": "en-US,en;q=0.5",
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36'
             }
 
-            # Make the request
-            req = session.get("https://www.facebook.com/", cookies=jar, headers=headers)
-
-            # Use the pre-compiled regex for matching
-            match = user_info_pattern.search(req.text)
-            if match:
-                user_id, user_name, user_email = match.groups()
-                if user_id and user_name and user_email:
-                    return True
-                else:
-                    return False
+            # Send request to Netflix
+            req = session.get("https://www.netflix.com", cookies=jar, headers=headers)
+            # Write beautified response 
+            if  "/browse" in req.url :
+                print("done")
+                return True
             else:
                 return False
     except Exception as e:
-        print(f"Error in fb_checker: {str(e)}")
-        return False
+        print(f"Error in netflix_net_checker: {str(e)}")
+
+
 
 def netflix_net_checker(cookies_data):
     try:
@@ -559,7 +575,6 @@ def netflix_net_checker(cookies_data):
 
             # Send request to Netflix
             req = session.get("https://www.netflix.com", cookies=jar, headers=headers)
-            print(req.url)
             # Write beautified response 
             if  "/browse" in req.url :
                 return True
@@ -568,3 +583,6 @@ def netflix_net_checker(cookies_data):
     except Exception as e:
         print(f"Error in netflix_net_checker: {str(e)}")
 
+
+
+    
